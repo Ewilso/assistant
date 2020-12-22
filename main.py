@@ -2,10 +2,12 @@ from vosk import Model, KaldiRecognizer
 import gtts
 import datetime
 import os
-from nltk.stem import LancasterStemmer
-from nltk.corpus import stopwords
-from nltk import word_tokenize, sent_tokenize
+import time
 import pyaudio
+
+def run(command):
+    os.system(command)
+    os.system("aplay bleep.wav")
 
 def speak(text):
     tts = gtts.gTTS(text)
@@ -35,7 +37,7 @@ def takeCommand():
         return ""
 
 if __name__=='__main__':
-    greeting()
+    speak("Booting up now")
     if not os.path.exists("model"):
         print ("Model needed, but not found.")
         exit (1)
@@ -49,16 +51,26 @@ if __name__=='__main__':
     stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=8000)
     stream.start_stream()
 
+    greeting()
     while True:
         statement = takeCommand()
         if statement=="":
             continue
-        if "goodbye" in statement or "bye" in statement:
-            speak('Goodbye for now')
+        if "open" in statement or "load" in statement:
+            if "term" in statement:
+                run("st &")
+            if "browser" in statement or " brave" in statement:
+                run("brave &")
+            if "atom" in statement or "editor" in statement:
+                run("atom &")
+        if " lock " in statement:
+            run("slock &")
+        if ("create" in statement or "make" in statement or "start" in statement) and "project" in statement:
+            run("")
+            name = ""
+            while name == "":
+                name = takeCommand()
+            run("cd ~/lib/code && mkdir " + name)
+        if "bye" in statement:
+            speak("Goodbye")
             break
-        if "stop " in statement and "music" in statement:
-            speak('Of course')
-            os.system("mpc clear")
-        if "play " in statement and "music" in statement:
-            speak('Right away')
-            os.system("cd ~/lib/music && mpc add * && mpc toggle &")
