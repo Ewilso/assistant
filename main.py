@@ -1,10 +1,24 @@
 from vosk import Model, KaldiRecognizer
-import gtts
-import datetime
 import os
 import time
 import pyaudio
 import random
+import Xlib
+from Xlib import display, X   # X is also needed
+
+display = Xlib.display.Display()
+screen = display.screen()
+root = screen.root
+
+#draw_it(root.get_attributes())
+root.change_attributes(event_mask=X.ExposureMask)  # "adds" this event mask
+#draw_it(root.get_attributes())  # see the difference
+
+gc = root.create_gc(foreground = screen.white_pixel, background = screen.black_pixel)
+
+def draw_it(output):
+    root.draw_text(gc, 100, 100, output.encode())
+    display.flush()
 
 def run(command):
     os.system(command)
@@ -15,14 +29,14 @@ def speak(text):
         os.system("mpg123 -q lines/prehub06.mp3")
     else:
         os.system("echo " + text + " | festival --tts")
-    #os.system("mpg123 -q say.mp3")
+        #os.system("mpg123 -q say.mp3")
 
 def greeting():
     path="/home/wilson/lib/portal/Cave Johnson/PTI/"
     files=os.listdir(path)
     d=random.choice(files)
     os.system("mpg123 -q /home/wilson/lib/portal/Cave\ Johnson/PTI/" + d)
-    print("--------------------------------------------------------------------")
+    draw_it("--------------------------------------------------------------------")
 
 def takeCommand():
     data = stream.read(700)
@@ -33,16 +47,16 @@ def takeCommand():
         stage2 = stage1.split('"text" : "')[1]
         result = stage2.split('"\n}')[0]
         if result != "":
-            print(result)
+            draw_it(result)
         return result
     else:
         return ""
 
 if __name__=='__main__':
+    draw_it("Init")
     speak("Welcome Sequence")
-    print("--------------------------------------------------------------------")
     if not os.path.exists("model"):
-        print ("Model needed, but not found.")
+        draw_it ("Model needed, but not found.")
         exit (1)
 
     global rec
@@ -78,5 +92,5 @@ if __name__=='__main__':
                 run("cd ~/lib/code && mkdir " + name)
             elif "bye" in statement:
                 speak("Goodbye")
-                print("--------------------------------------------------------------------")
+                draw_it("--------------------------------------------------------------------")
                 break
